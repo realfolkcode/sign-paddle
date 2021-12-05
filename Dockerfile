@@ -10,5 +10,5 @@ RUN pip install tqdm
 
 RUN chmod +x scipts/
 
-WORKDIR scipts
+ENTRYPOINT ["/scripts/commands.sh"]
 
