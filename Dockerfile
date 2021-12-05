@@ -8,6 +8,8 @@ RUN pip install pgl
 RUN pip install -U scikit-learn
 RUN pip install tqdm
 
+RUN mkdir logs
+
 RUN chmod +x scripts/commands.sh
 RUN chmod +x scripts/download.sh
 WORKDIR scripts
