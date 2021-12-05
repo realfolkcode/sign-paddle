@@ -10,5 +10,5 @@ RUN pip install tqdm
 
 WORKDIR scripts
 
-ENTRYPOINT ["/commands.sh"]
+ENTRYPOINT ["./commands.sh"]
 
