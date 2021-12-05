@@ -11,5 +11,5 @@ RUN pip install tqdm
 RUN chmod +x scripts/
 WORKDIR /scripts
 
-ENTRYPOINT ["commands.sh"]
+ENTRYPOINT ["/bin/bash", "-c", "./commands.sh"]
 
