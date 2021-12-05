@@ -13,7 +13,6 @@ RUN mkdir models
 
 RUN chmod +x scripts/commands.sh
 RUN chmod +x scripts/download.sh
-WORKDIR scripts
 
-ENTRYPOINT ["/bin/bash", "-c", "./commands.sh"]
+ENTRYPOINT ["/bin/bash", "-c", "./scripts/commands.sh"]
 
