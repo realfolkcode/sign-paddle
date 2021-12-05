@@ -8,7 +8,7 @@ RUN pip install pgl
 RUN pip install -U scikit-learn
 RUN pip install tqdm
 
-RUN sudo chmod +x scripts/
+RUN chmod +x scripts/
 WORKDIR scripts
 
 ENTRYPOINT ["/bin/bash", "-c", "./commands.sh"]
