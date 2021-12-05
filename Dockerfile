@@ -9,7 +9,7 @@ RUN pip install -U scikit-learn
 RUN pip install tqdm
 
 RUN chmod +x scripts/
-WORKDIR /scripts
+WORKDIR scripts
 
 ENTRYPOINT ["/bin/bash", "-c", "./commands.sh"]
 
