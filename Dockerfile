@@ -1,9 +1,8 @@
-FROM python:3.8
+FROM paddlepaddle/paddle:2.2.1-gpu-cuda11.2-cudnn8
 
 COPY . /sign
 WORKDIR /sign
 
-RUN python -m pip install paddlepaddle-gpu==2.2.1 -i https://mirror.baidu.com/pypi/simple
 RUN pip install pgl
 RUN pip install -U scikit-learn
 RUN pip install tqdm
