@@ -208,7 +208,6 @@ class ComplexDataset(BaseDataset):
         for mol, y in tqdm(zip(data_mols, data_Y)):
             graphs, global_feat = self.build_graph(mol)
             if graphs is None:
-                idx += 1
                 continue
             graph_path = f'{self.data_path}/{self.dataset}_{int(self.cut_dist)}_{self.num_angle}_pgl_graph_{idx}.pkl'
             self.save(idx, graphs, global_feat, y)
