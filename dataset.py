@@ -62,10 +62,10 @@ class ComplexDataset(BaseDataset):
         inter_feats, bond_types, type_count = global_feat
         return a2a_graph, b2a_graph, b2b_graph, inter_feats, bond_types, type_count, label
 
-    def has_cache(self):
+    def has_cache(self, idx):
         """ Check cache file."""
-        self.graph_path = f'{self.data_path}/{self.dataset}_{int(self.cut_dist)}_{self.num_angle}_pgl_graph.pkl'
-        return os.path.exists(self.graph_path)
+        graph_path = self.graph_prefix + f'_{idx}.pkl'
+        return os.path.exists(graph_path)
 
     def save(self, idx, graphs, global_feat, label):
         """ Save the generated graphs. """
@@ -206,10 +206,12 @@ class ComplexDataset(BaseDataset):
 
         idx = 0
         for mol, y in tqdm(zip(data_mols, data_Y)):
+            if self.has_cache(idx):
+                idx += 1
+                continue
             graphs, global_feat = self.build_graph(mol)
             if graphs is None:
                 continue
-            graph_path = f'{self.data_path}/{self.dataset}_{int(self.cut_dist)}_{self.num_angle}_pgl_graph_{idx}.pkl'
             self.save(idx, graphs, global_feat, y)
             idx += 1
         self.length = idx
