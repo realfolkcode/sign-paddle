@@ -69,7 +69,7 @@ class ComplexDataset(BaseDataset):
 
     def save(self, idx, graphs, global_feat, label):
         """ Save the generated graphs. """
-        print('Saving graphs...')
+        #print('Saving graphs...')
         graph_path = self.graph_prefix + f'_{idx}.pkl'
         with open(graph_path, 'wb') as f:
             pickle.dump((graphs, global_feat, label), f)
