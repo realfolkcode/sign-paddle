@@ -165,5 +165,5 @@ if __name__ == "__main__":
     tst_loader = Dataloader(tst_complex, args.batch_size, shuffle=False, num_workers=1, collate_fn=collate_fn)
     val_loader = Dataloader(val_complex, args.batch_size, shuffle=False, num_workers=1, collate_fn=collate_fn)
 
-    model = SIGN(args)
+    model = SIGN(args).to('gpu')
     train(args, model, trn_loader, tst_loader, val_loader)
