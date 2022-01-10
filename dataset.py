@@ -38,7 +38,8 @@ class ComplexDataset(BaseDataset):
         self.cut_dist = cut_dist
         self.num_angle = num_angle
         self.save_file = save_file
-    
+        self.graph_prefix = f'{self.data_path}/{self.dataset}_{int(self.cut_dist)}_{self.num_angle}_pgl_graph'
+
         self.labels = []
         self.a2a_graphs = []
         self.b2a_graphs = []
@@ -48,37 +49,39 @@ class ComplexDataset(BaseDataset):
         self.type_count_list = []
 
         self.load_data()
-        
 
     def __len__(self):
         """ Return the number of graphs. """
+        return self.length
         return len(self.labels)
-    
+
     def __getitem__(self, idx):
         """ Return graphs and label. """
-        return self.a2a_graphs[idx], self.b2a_graphs[idx], self.b2b_grpahs_list[idx],\
-               self.inter_feats_list[idx], self.bond_types_list[idx], self.type_count_list[idx], self.labels[idx]
+        graphs, global_feat, label = self.load(idx)
+        a2a_graph, b2a_graph, b2b_graph = graphs
+        inter_feats, bond_types, type_count = global_feat
+        return a2a_graph, b2a_graph, b2b_graph, inter_feats, bond_types, type_count, label
 
-    def has_cache(self):
+    def has_cache(self, idx):
         """ Check cache file."""
-        self.graph_path = f'{self.data_path}/{self.dataset}_{int(self.cut_dist)}_{self.num_angle}_pgl_graph.pkl'
-        return os.path.exists(self.graph_path)
-    
-    def save(self):
-        """ Save the generated graphs. """
-        print('Saving processed complex data...')
-        graphs = [self.a2a_graphs, self.b2a_graphs, self.b2b_grpahs_list]
-        global_feat = [self.inter_feats_list, self.bond_types_list, self.type_count_list]
-        with open(self.graph_path, 'wb') as f:
-            pickle.dump((graphs, global_feat, self.labels), f)
+        graph_path = self.graph_prefix + f'_{idx}.pkl'
+        return os.path.exists(graph_path)
 
-    def load(self):
+    def save(self, idx, graphs, global_feat, label):
+        """ Save the generated graphs. """
+        #print('Saving graphs...')
+        graph_path = self.graph_prefix + f'_{idx}.pkl'
+        with open(graph_path, 'wb') as f:
+            pickle.dump((graphs, global_feat, label), f)
+
+    def load(self, idx):
         """ Load the generated graphs. """
-        print('Loading processed complex data...')
-        with open(self.graph_path, 'rb') as f:
-            graphs, global_feat, labels = pickle.load(f)
-        return graphs, global_feat, labels
-    
+        # print('Loading processed complex data...')
+        graph_path = self.graph_prefix + f'_{idx}.pkl'
+        with open(graph_path, 'rb') as f:
+            graphs, global_feat, label = pickle.load(f)
+        return graphs, global_feat, label
+
     def build_graph(self, mol):
         num_atoms_d, coords, features, atoms, inter_feats = mol
 
@@ -95,11 +98,12 @@ class ComplexDataset(BaseDataset):
         ############################
         num_atoms = len(coords)
         dist_graph_base = dist_mat.copy()
-        dist_feat = dist_graph_base[dist_graph_base < self.cut_dist].reshape(-1,1)
+        dist_feat = dist_graph_base[dist_graph_base < self.cut_dist].reshape(-1, 1)
         dist_graph_base[dist_graph_base >= self.cut_dist] = 0.
         atom_graph = coo_matrix(dist_graph_base)
         a2a_edges = list(zip(atom_graph.row, atom_graph.col))
-        a2a_graph = pgl.Graph(a2a_edges, num_nodes=num_atoms, node_feat={"feat": features}, edge_feat={"dist": dist_feat})
+        a2a_graph = pgl.Graph(a2a_edges, num_nodes=num_atoms, node_feat={"feat": features},
+                              edge_feat={"dist": dist_feat})
 
         ######################
         # prepare bond nodes #
@@ -123,8 +127,8 @@ class ComplexDataset(BaseDataset):
         # build bond to atom graph #
         ############################
         num_bonds = len(indices)
-        assignment_b2a = np.zeros((num_bonds, num_atoms), dtype=np.int64) # Maybe need too much memory
-        assignment_a2b = np.zeros((num_atoms, num_bonds), dtype=np.int64) # Maybe need too much memory
+        assignment_b2a = np.zeros((num_bonds, num_atoms), dtype=np.int64)  # Maybe need too much memory
+        assignment_a2b = np.zeros((num_atoms, num_bonds), dtype=np.int64)  # Maybe need too much memory
         for i, idx in enumerate(indices):
             assignment_b2a[i, idx[1]] = 1
             assignment_a2b[idx[0], i] = 1
@@ -137,8 +141,8 @@ class ComplexDataset(BaseDataset):
         # build bond to bond graph #
         ############################
         bond_graph_base = assignment_b2a @ assignment_a2b
-        np.fill_diagonal(bond_graph_base, 0) # eliminate self connections
-        bond_graph_base[range(num_bonds), [indices.index([x[1],x[0]]) for x in indices]] = 0 
+        np.fill_diagonal(bond_graph_base, 0)  # eliminate self connections
+        bond_graph_base[range(num_bonds), [indices.index([x[1], x[0]]) for x in indices]] = 0
         x, y = np.where(bond_graph_base > 0)
         num_edges = len(x)
 
@@ -158,7 +162,7 @@ class ComplexDataset(BaseDataset):
                 # exit(-1)
             else:
                 angle_feat[i] = cos_formula(a, b, c)
-        
+
         # angle domain divisions
         unit = 180.0 / self.num_angle
         angle_index = (np.rad2deg(angle_feat) / unit).astype('int64')
@@ -170,7 +174,7 @@ class ComplexDataset(BaseDataset):
         for i, (ind, radian) in enumerate(zip(angle_index, angle_feat)):
             b2b_edges_list[ind].append((x[i], y[i]))
             b2b_angle_list[ind].append(radian)
-        
+
         # b2b_graph_list = [[] for _ in range(self.num_angle)]
         b2b_graph_list = []
         for ind in range(self.num_angle):
@@ -195,38 +199,27 @@ class ComplexDataset(BaseDataset):
 
     def load_data(self):
         """ Generate complex interaction graphs. """
-        if self.has_cache():
-            graphs, global_feat, labels = self.load()
-            self.a2a_graphs, self.b2a_graphs, self.b2b_grpahs_list = graphs
-            self.inter_feats_list, self.bond_types_list, self.type_count_list = global_feat
-            self.labels = labels
-        else:
-            print('Processing raw protein-ligand complex data...')
-            file_name = os.path.join(self.data_path, "{0}.pkl".format(self.dataset))
-            with open(file_name, 'rb') as f:
-                data_mols, data_Y = pickle.load(f)
+        print('Processing raw protein-ligand complex data...')
+        file_name = os.path.join(self.data_path, "{0}.pkl".format(self.dataset))
+        with open(file_name, 'rb') as f:
+            data_mols, data_Y = pickle.load(f)
 
-            for mol, y in tqdm(zip(data_mols, data_Y)):
-                graphs, global_feat = self.build_graph(mol)
-                if graphs is None:
-                    continue
-                self.a2a_graphs.append(graphs[0])
-                self.b2a_graphs.append(graphs[1])
-                self.b2b_grpahs_list.append(graphs[2])
-
-                self.inter_feats_list.append(global_feat[0])
-                self.bond_types_list.append(global_feat[1])
-                self.type_count_list.append(global_feat[2])
-                self.labels.append(y)
-
-            self.labels = np.array(self.labels).reshape(-1, 1)
-            # self.labels = np.array(data_Y).reshape(-1, 1)
-            if self.save_file:
-                self.save()
+        idx = 0
+        for mol, y in tqdm(zip(data_mols, data_Y)):
+            if self.has_cache(idx):
+                idx += 1
+                continue
+            graphs, global_feat = self.build_graph(mol)
+            if graphs is None:
+                continue
+            self.save(idx, graphs, global_feat, y)
+            idx += 1
+        self.length = idx
 
 
 def collate_fn(batch):
     a2a_gs, b2a_gs, b2b_gs_l, feats, types, counts, labels = map(list, zip(*batch))
+    labels = np.array(labels).reshape(-1, 1)
 
     a2a_g = pgl.Graph.batch(a2a_gs).tensor()
     b2a_g = pgl.BiGraph.batch(b2a_gs).tensor()
