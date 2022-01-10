@@ -153,11 +153,10 @@ if __name__ == "__main__":
     if not os.path.isdir(args.model_dir):
         os.mkdir(args.model_dir)
     
-    #if int(args.cuda) == -1:
-    #    paddle.set_device('cpu')
-    #else:
-    #    paddle.set_device('gpu:%s' % args.cuda)
-    paddle.set_device('cpu')
+    if int(args.cuda) == -1:
+        paddle.set_device('cpu')
+    else:
+        paddle.set_device('gpu:%s' % args.cuda)
     trn_complex = ComplexDataset(args.data_dir, "%s_train" % args.dataset, args.cut_dist, args.num_angle)
     tst_complex = ComplexDataset(args.data_dir, "%s_test" % args.dataset, args.cut_dist, args.num_angle)
     val_complex = ComplexDataset(args.data_dir, "%s_val" % args.dataset, args.cut_dist, args.num_angle)
