@@ -227,7 +227,7 @@ def collate_fn(batch):
     feats = paddle.concat([paddle.to_tensor(f, dtype='float32') for f in feats])
     types = paddle.concat([paddle.to_tensor(t) for t in types])
     counts = paddle.stack([paddle.to_tensor(c) for c in counts], axis=1)
-    labels = paddle.to_tensor(np.array(labels), dtype='float32')
+    labels = paddle.to_tensor(labels, dtype='float32')
 
     return a2a_g, b2a_g, b2b_gl, feats, types, counts, labels
 
