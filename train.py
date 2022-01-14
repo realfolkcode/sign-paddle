@@ -83,6 +83,10 @@ def train(args, model, trn_loader, tst_loader, val_loader):
     
             sum_loss += loss
             sum_loss_inter += loss_inter
+            
+            del batch_data
+            paddle.device.cuda.empty_cache()
+
 
         end_trn = time.time()
         rmse_val, mae_val, sd_val, r_val = evaluate(model, val_loader)
