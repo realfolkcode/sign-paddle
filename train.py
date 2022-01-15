@@ -168,8 +168,8 @@ if __name__ == "__main__":
     tst_complex = ComplexDataset(args.data_dir, "%s_test" % args.dataset, args.cut_dist, args.num_angle)
     val_complex = ComplexDataset(args.data_dir, "%s_val" % args.dataset, args.cut_dist, args.num_angle)
     trn_loader = Dataloader(trn_complex, args.batch_size, shuffle=True, num_workers=args.num_workers, collate_fn=collate_fn)
-    tst_loader = Dataloader(tst_complex, args.batch_size, shuffle=False, num_workers=args.num_workers, collate_fn=collate_fn)
-    val_loader = Dataloader(val_complex, args.batch_size, shuffle=False, num_workers=args.num_workers, collate_fn=collate_fn)
+    tst_loader = Dataloader(tst_complex, args.batch_size, shuffle=False, num_workers=1, collate_fn=collate_fn)
+    val_loader = Dataloader(val_complex, args.batch_size, shuffle=False, num_workers=1, collate_fn=collate_fn)
 
     model = SIGN(args)
     train(args, model, trn_loader, tst_loader, val_loader)
