@@ -70,7 +70,7 @@ class ComplexDataset(BaseDataset):
         graphs = [self.a2a_graphs, self.b2a_graphs, self.b2b_grpahs_list]
         global_feat = [self.inter_feats_list, self.bond_types_list, self.type_count_list]
         with open(self.graph_path, 'wb') as f:
-            pickle.dump((graphs, global_feat, self.labels), f)
+            pickle.dump((graphs, global_feat, self.labels), f, protocol=4)
 
     def load(self):
         """ Load the generated graphs. """
