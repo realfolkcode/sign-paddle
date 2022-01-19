@@ -46,8 +46,6 @@ def evaluate(model, loader):
         _, y_hat = model(a2a_g, b2a_g, b2b_gl, types, counts)
         y_hat_list += y_hat.tolist()
         y_list += y.tolist()
-    del batch_data
-    paddle.device.cuda.empty_cache()
 
     y_hat = np.array(y_hat_list).reshape(-1,)
     y = np.array(y_list).reshape(-1,)
@@ -85,9 +83,6 @@ def train(args, model, trn_loader, tst_loader, val_loader):
     
             sum_loss += loss
             sum_loss_inter += loss_inter
-            
-        del batch_data
-        paddle.device.cuda.empty_cache()
 
 
         end_trn = time.time()
