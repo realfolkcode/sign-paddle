@@ -14,4 +14,4 @@ wget -P "../data" $PDBBIND_URL
 wget -P "../data" $DATASET_URL
 wget -P "../data" $TARGET_URL
 tar -xf "../data/PDBbind_dataset.tar.gz" -C "../data"
-unzip -a "../data/67k_docked.zip" -d "../data"
+unzip -aq "../data/67k_docked.zip" -d "../data"
