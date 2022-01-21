@@ -13,5 +13,5 @@ TARGET_URL="https://www.dropbox.com/s/4sx8vtrhwjxunwj/67k-energy_rmsd.tsv"
 wget -P "../data" $PDBBIND_URL
 wget -P "../data" $DATASET_URL
 wget -P "../data" $TARGET_URL
-tar -xvf "../data/PDBbind_dataset.tar.gz" -C "../data"
+tar -xf "../data/PDBbind_dataset.tar.gz" -C "../data"
 unzip -a "../data/67k_docked.zip" -d "../data"
