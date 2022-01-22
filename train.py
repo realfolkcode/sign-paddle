@@ -81,8 +81,8 @@ def train(args, model, trn_loader, tst_loader, val_loader):
             optim.clear_grad()
             scheduler.step()
     
-            sum_loss += loss
-            sum_loss_inter += loss_inter
+            sum_loss += loss.item()
+            sum_loss_inter += loss_inter.item()
 
 
         end_trn = time.time()
