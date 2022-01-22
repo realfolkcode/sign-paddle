@@ -31,8 +31,9 @@ prot_atom_ids = [6, 7, 8, 16]
 drug_atom_ids = [6, 7, 8, 9, 15, 16, 17, 35, 53]
 pair_ids = [(i, j) for i in prot_atom_ids for j in drug_atom_ids]
 
+
 class ComplexDataset(BaseDataset):
-    def __init__(self, data_path, dataset, cut_dist, num_angle, save_file=True):
+    def __init__(self, data_path, dataset, cut_dist, num_angle, start, end, save_file=True):
         self.data_path = data_path
         self.dataset = dataset
         self.cut_dist = cut_dist
@@ -48,19 +49,16 @@ class ComplexDataset(BaseDataset):
         self.bond_types_list = []
         self.type_count_list = []
 
-        self.load_data()
+        self.load_data(start, end)
 
     def __len__(self):
         """ Return the number of graphs. """
-        return self.length
         return len(self.labels)
 
     def __getitem__(self, idx):
         """ Return graphs and label. """
-        graphs, global_feat, label = self.load(idx)
-        a2a_graph, b2a_graph, b2b_graph = graphs
-        inter_feats, bond_types, type_count = global_feat
-        return a2a_graph, b2a_graph, b2b_graph, inter_feats, bond_types, type_count, label
+        return self.a2a_graphs[idx], self.b2a_graphs[idx], self.b2b_grpahs_list[idx], \
+               self.inter_feats_list[idx], self.bond_types_list[idx], self.type_count_list[idx], self.labels[idx]
 
     def has_cache(self, idx):
         """ Check cache file."""
@@ -69,18 +67,25 @@ class ComplexDataset(BaseDataset):
 
     def save(self, idx, graphs, global_feat, label):
         """ Save the generated graphs. """
-        #print('Saving graphs...')
+        print('Saving graphs...')
         graph_path = self.graph_prefix + f'_{idx}.pkl'
         with open(graph_path, 'wb') as f:
             pickle.dump((graphs, global_feat, label), f)
 
     def load(self, idx):
         """ Load the generated graphs. """
-        # print('Loading processed complex data...')
         graph_path = self.graph_prefix + f'_{idx}.pkl'
         with open(graph_path, 'rb') as f:
             graphs, global_feat, label = pickle.load(f)
-        return graphs, global_feat, label
+        a2a_graph, b2a_graph, b2b_graph = graphs
+        inter_feats, bond_types, type_count = global_feat
+        self.labels.append(label)
+        self.a2a_graphs.append(a2a_graph)
+        self.b2a_graphs.append(b2a_graph)
+        self.b2b_grpahs_list.append(b2b_graph)
+        self.inter_feats_list.append(inter_feats)
+        self.bond_types_list.append(bond_types)
+        self.type_count_list.append(type_count)
 
     def build_graph(self, mol):
         num_atoms_d, coords, features, atoms, inter_feats = mol
@@ -197,7 +202,7 @@ class ComplexDataset(BaseDataset):
         global_feat = inter_feats, bond_types, type_count
         return graphs, global_feat
 
-    def load_data(self):
+    def load_data(self, start, end):
         """ Generate complex interaction graphs. """
         print('Processing raw protein-ligand complex data...')
         file_name = os.path.join(self.data_path, "{0}.pkl".format(self.dataset))
@@ -214,12 +219,14 @@ class ComplexDataset(BaseDataset):
                 continue
             self.save(idx, graphs, global_feat, y)
             idx += 1
-        self.length = idx
 
+        print('Loading dataset...')
+        for idx in tqdm(range(start, end + 1)):
+            self.load(idx)
+        self.labels = np.array(self.labels).reshape(-1, 1)
 
 def collate_fn(batch):
     a2a_gs, b2a_gs, b2b_gs_l, feats, types, counts, labels = map(list, zip(*batch))
-    labels = np.array(labels).reshape(-1, 1)
 
     a2a_g = pgl.Graph.batch(a2a_gs).tensor()
     b2a_g = pgl.BiGraph.batch(b2a_gs).tensor()
@@ -227,7 +234,7 @@ def collate_fn(batch):
     feats = paddle.concat([paddle.to_tensor(f, dtype='float32') for f in feats])
     types = paddle.concat([paddle.to_tensor(t) for t in types])
     counts = paddle.stack([paddle.to_tensor(c) for c in counts], axis=1)
-    labels = paddle.to_tensor(labels, dtype='float32')
+    labels = paddle.to_tensor(np.array(labels), dtype='float32')
 
     return a2a_g, b2a_g, b2b_gl, feats, types, counts, labels
 
