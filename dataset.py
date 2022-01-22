@@ -67,7 +67,7 @@ class ComplexDataset(BaseDataset):
 
     def save(self, idx, graphs, global_feat, label):
         """ Save the generated graphs. """
-        print('Saving graphs...')
+        # print('Saving graphs...')
         graph_path = self.graph_prefix + f'_{idx}.pkl'
         with open(graph_path, 'wb') as f:
             pickle.dump((graphs, global_feat, label), f)
@@ -77,15 +77,7 @@ class ComplexDataset(BaseDataset):
         graph_path = self.graph_prefix + f'_{idx}.pkl'
         with open(graph_path, 'rb') as f:
             graphs, global_feat, label = pickle.load(f)
-        a2a_graph, b2a_graph, b2b_graph = graphs
-        inter_feats, bond_types, type_count = global_feat
-        self.labels.append(label)
-        self.a2a_graphs.append(a2a_graph)
-        self.b2a_graphs.append(b2a_graph)
-        self.b2b_grpahs_list.append(b2b_graph)
-        self.inter_feats_list.append(inter_feats)
-        self.bond_types_list.append(bond_types)
-        self.type_count_list.append(type_count)
+        return graphs, global_feat, label
 
     def build_graph(self, mol):
         num_atoms_d, coords, features, atoms, inter_feats = mol
@@ -210,19 +202,24 @@ class ComplexDataset(BaseDataset):
             data_mols, data_Y = pickle.load(f)
 
         idx = 0
-        for mol, y in tqdm(zip(data_mols, data_Y)):
+        for mol, label in tqdm(zip(data_mols, data_Y)):
             if self.has_cache(idx):
-                idx += 1
-                continue
-            graphs, global_feat = self.build_graph(mol)
-            if graphs is None:
-                continue
-            self.save(idx, graphs, global_feat, y)
+                graphs, global_feat, label = self.load(idx)
+            else:
+                graphs, global_feat = self.build_graph(mol)
+                if graphs is None:
+                    continue
+                self.save(idx, graphs, global_feat, label)
+            a2a_graph, b2a_graph, b2b_graph = graphs
+            inter_feats, bond_types, type_count = global_feat
+            self.labels.append(label)
+            self.a2a_graphs.append(a2a_graph)
+            self.b2a_graphs.append(b2a_graph)
+            self.b2b_grpahs_list.append(b2b_graph)
+            self.inter_feats_list.append(inter_feats)
+            self.bond_types_list.append(bond_types)
+            self.type_count_list.append(type_count)
             idx += 1
-
-        print('Loading dataset...')
-        for idx in tqdm(range(start, end + 1)):
-            self.load(idx)
         self.labels = np.array(self.labels).reshape(-1, 1)
 
 def collate_fn(batch):
