@@ -62,7 +62,6 @@ def train(args, model, trn_loader, tst_loader, val_loader):
     # l1_loss = paddle.nn.loss.L1Loss(reduction='sum')
 
     rmse_val_best, res_tst_best = 1e9, ''
-    running_log = ''
     print('Start training model...')
     for epoch in range(1, args.epochs + 1):
         sum_loss, sum_loss_inter = 0, 0
@@ -174,6 +173,7 @@ if __name__ == "__main__":
     val_loader = Dataloader(val_complex, args.batch_size, shuffle=False, num_workers=1, collate_fn=collate_fn)
 
     model = SIGN(args)
+    running_log = ''
     for i in range(args.chunks):
         chunk_len = train_len // args.chunks
         start = i * chunk_len
