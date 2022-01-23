@@ -163,6 +163,10 @@ if __name__ == "__main__":
     else:
         paddle.set_device('gpu:%s' % args.cuda)
 
+    trn_complex = BuildDataset(args.data_dir, "%s_train" % args.dataset, args.cut_dist, args.num_angle)
+    tst_complex = BuildDataset(args.data_dir, "%s_test" % args.dataset, args.cut_dist, args.num_angle)
+    val_complex = BuildDataset(args.data_dir, "%s_val" % args.dataset, args.cut_dist, args.num_angle)
+
     tst_complex = ComplexDataset(args.data_dir, "%s_test" % args.dataset, args.cut_dist, args.num_angle, 0, args.test_len-1)
     val_complex = ComplexDataset(args.data_dir, "%s_val" % args.dataset, args.cut_dist, args.num_angle, 0, args.val_len-1)
     tst_loader = Dataloader(tst_complex, args.batch_size, shuffle=False, num_workers=1, collate_fn=collate_fn)
