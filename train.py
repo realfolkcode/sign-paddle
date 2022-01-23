@@ -123,6 +123,9 @@ if __name__ == "__main__":
     parser.add_argument('--cuda', type=str, default='0')
     parser.add_argument('--seed', type=int, default=123)
     parser.add_argument("--save_model", action="store_true", default=True)
+    parser.add_argument('--train_len', type=int, default=3390)
+    parser.add_argument('--vest_len', type=int, default=290)
+    parser.add_argument('--val_len', type=int, default=377)
 
     parser.add_argument("--lambda_", type=float, default=1.75)
     parser.add_argument("--feat_drop", type=float, default=0.2)
@@ -158,9 +161,10 @@ if __name__ == "__main__":
         paddle.set_device('cpu')
     else:
         paddle.set_device('gpu:%s' % args.cuda)
-    trn_complex = ComplexDataset(args.data_dir, "%s_train" % args.dataset, args.cut_dist, args.num_angle, 0, 3389)
-    tst_complex = ComplexDataset(args.data_dir, "%s_test" % args.dataset, args.cut_dist, args.num_angle, 0, 289)
-    val_complex = ComplexDataset(args.data_dir, "%s_val" % args.dataset, args.cut_dist, args.num_angle, 0, 376)
+
+    trn_complex = ComplexDataset(args.data_dir, "%s_train" % args.dataset, args.cut_dist, args.num_angle, 0, args.train_len-1)
+    tst_complex = ComplexDataset(args.data_dir, "%s_test" % args.dataset, args.cut_dist, args.num_angle, 0, args.test_len-1)
+    val_complex = ComplexDataset(args.data_dir, "%s_val" % args.dataset, args.cut_dist, args.num_angle, 0, args.val_len-1)
     trn_loader = Dataloader(trn_complex, args.batch_size, shuffle=True, num_workers=1, collate_fn=collate_fn)
     tst_loader = Dataloader(tst_complex, args.batch_size, shuffle=False, num_workers=1, collate_fn=collate_fn)
     val_loader = Dataloader(val_complex, args.batch_size, shuffle=False, num_workers=1, collate_fn=collate_fn)
