@@ -126,6 +126,7 @@ if __name__ == "__main__":
     parser.add_argument('--train_len', type=int, default=3390)
     parser.add_argument('--test_len', type=int, default=290)
     parser.add_argument('--val_len', type=int, default=377)
+    parser.add_argument('--chunks', type=int, default=1)
 
     parser.add_argument("--lambda_", type=float, default=1.75)
     parser.add_argument("--feat_drop", type=float, default=0.2)
@@ -162,12 +163,19 @@ if __name__ == "__main__":
     else:
         paddle.set_device('gpu:%s' % args.cuda)
 
-    trn_complex = ComplexDataset(args.data_dir, "%s_train" % args.dataset, args.cut_dist, args.num_angle, 0, args.train_len-1)
     tst_complex = ComplexDataset(args.data_dir, "%s_test" % args.dataset, args.cut_dist, args.num_angle, 0, args.test_len-1)
     val_complex = ComplexDataset(args.data_dir, "%s_val" % args.dataset, args.cut_dist, args.num_angle, 0, args.val_len-1)
-    trn_loader = Dataloader(trn_complex, args.batch_size, shuffle=True, num_workers=1, collate_fn=collate_fn)
     tst_loader = Dataloader(tst_complex, args.batch_size, shuffle=False, num_workers=1, collate_fn=collate_fn)
     val_loader = Dataloader(val_complex, args.batch_size, shuffle=False, num_workers=1, collate_fn=collate_fn)
 
     model = SIGN(args)
-    train(args, model, trn_loader, tst_loader, val_loader)
+    for i in range(args.chunks):
+        chunk_len = args.train_len // args.chunks
+        start = i * chunk_len
+        if i == args.chunks - 1:
+            end = args.train_len - 1
+        else:
+            end = start + chunk_len - 1
+        trn_complex = ComplexDataset(args.data_dir, "%s_train" % args.dataset, args.cut_dist, args.num_angle, start, end)
+        trn_loader = Dataloader(trn_complex, args.batch_size, shuffle=True, num_workers=1, collate_fn=collate_fn)
+        train(args, model, trn_loader, tst_loader, val_loader)
