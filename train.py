@@ -178,7 +178,7 @@ if __name__ == "__main__":
         chunk_len = train_len // args.chunks
         start = i * chunk_len
         if i == args.chunks - 1:
-            end = args.train_len - 1
+            end = train_len - 1
         else:
             end = start + chunk_len - 1
         trn_complex = ComplexDataset(args.data_dir, "%s_train" % args.dataset, args.cut_dist, args.num_angle, start, end)
