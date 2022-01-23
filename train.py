@@ -52,7 +52,7 @@ def evaluate(model, loader):
     return rmse(y, y_hat), mae(y, y_hat), sd(y, y_hat), pearson(y, y_hat)
 
 
-def train(args, model, trn_loader, tst_loader, val_loader):
+def train(args, model, trn_loader, tst_loader, val_loader, running_log):
     # learning rate decay and optimizer
     epoch_step = len(trn_loader)
     boundaries = [i for i in range(args.dec_step, args.epochs*epoch_step, args.dec_step)]
@@ -112,6 +112,7 @@ def train(args, model, trn_loader, tst_loader, val_loader):
     f = open(os.path.join(args.model_dir, 'log.txt'), 'w')
     f.write(running_log + res_tst_best)
     f.close()
+    return running_log + res_tst_best
 
 
 if __name__ == "__main__":
@@ -183,4 +184,4 @@ if __name__ == "__main__":
             end = start + chunk_len - 1
         trn_complex = ComplexDataset(args.data_dir, "%s_train" % args.dataset, args.cut_dist, args.num_angle, start, end)
         trn_loader = Dataloader(trn_complex, args.batch_size, shuffle=True, num_workers=1, collate_fn=collate_fn)
-        train(args, model, trn_loader, tst_loader, val_loader)
+        running_log = train(args, model, trn_loader, tst_loader, val_loader, running_log)
