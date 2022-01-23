@@ -123,9 +123,6 @@ if __name__ == "__main__":
     parser.add_argument('--cuda', type=str, default='0')
     parser.add_argument('--seed', type=int, default=123)
     parser.add_argument("--save_model", action="store_true", default=True)
-    parser.add_argument('--train_len', type=int, default=3390)
-    parser.add_argument('--test_len', type=int, default=290)
-    parser.add_argument('--val_len', type=int, default=377)
     parser.add_argument('--chunks', type=int, default=1)
 
     parser.add_argument("--lambda_", type=float, default=1.75)
@@ -167,14 +164,18 @@ if __name__ == "__main__":
     tst_complex = BuildDataset(args.data_dir, "%s_test" % args.dataset, args.cut_dist, args.num_angle)
     val_complex = BuildDataset(args.data_dir, "%s_val" % args.dataset, args.cut_dist, args.num_angle)
 
-    tst_complex = ComplexDataset(args.data_dir, "%s_test" % args.dataset, args.cut_dist, args.num_angle, 0, args.test_len-1)
-    val_complex = ComplexDataset(args.data_dir, "%s_val" % args.dataset, args.cut_dist, args.num_angle, 0, args.val_len-1)
+    train_len = len(trn_complex)
+    test_len = len(tst_complex)
+    val_len = len(val_complex)
+
+    tst_complex = ComplexDataset(args.data_dir, "%s_test" % args.dataset, args.cut_dist, args.num_angle, 0, test_len-1)
+    val_complex = ComplexDataset(args.data_dir, "%s_val" % args.dataset, args.cut_dist, args.num_angle, 0, val_len-1)
     tst_loader = Dataloader(tst_complex, args.batch_size, shuffle=False, num_workers=1, collate_fn=collate_fn)
     val_loader = Dataloader(val_complex, args.batch_size, shuffle=False, num_workers=1, collate_fn=collate_fn)
 
     model = SIGN(args)
     for i in range(args.chunks):
-        chunk_len = args.train_len // args.chunks
+        chunk_len = train_len // args.chunks
         start = i * chunk_len
         if i == args.chunks - 1:
             end = args.train_len - 1

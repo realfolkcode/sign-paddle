@@ -50,6 +50,10 @@ class BuildDataset(BaseDataset):
 
         self.load_data()
 
+    def __len__(self):
+        """ Return the number of graphs. """
+        return self.length
+
     def has_cache(self, idx):
         """ Check cache file."""
         graph_path = self.graph_prefix + f'_{idx}.pkl'
@@ -198,12 +202,11 @@ class BuildDataset(BaseDataset):
 
 
 class ComplexDataset(BaseDataset):
-    def __init__(self, data_path, dataset, cut_dist, num_angle, start, end, save_file=True):
+    def __init__(self, data_path, dataset, cut_dist, num_angle, start, end):
         self.data_path = data_path
         self.dataset = dataset
         self.cut_dist = cut_dist
         self.num_angle = num_angle
-        self.save_file = save_file
         self.graph_prefix = f'{self.data_path}/{self.dataset}_{int(self.cut_dist)}_{self.num_angle}_pgl_graph'
 
         self.labels = []
@@ -258,7 +261,6 @@ def collate_fn(batch):
     labels = paddle.to_tensor(np.array(labels), dtype='float32')
 
     return a2a_g, b2a_g, b2b_gl, feats, types, counts, labels
-
 
 if __name__ == "__main__":
     complex_data = ComplexDataset("./data/", "pdbbind2016_test", 5, 6)
