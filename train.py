@@ -133,7 +133,6 @@ if __name__ == "__main__":
     parser.add_argument("--dec_step", type=int, default=8000)
     parser.add_argument('--stop_epoch', type=int, default=100)
     parser.add_argument('--epochs', type=int, default=300)
-    parser.add_argument('--num_workers', type=int, default=1)
 
     parser.add_argument("--num_convs", type=int, default=2)
     parser.add_argument("--hidden_dim", type=int, default=128)
@@ -162,7 +161,7 @@ if __name__ == "__main__":
     trn_complex = ComplexDataset(args.data_dir, "%s_train" % args.dataset, args.cut_dist, args.num_angle, 0, 3389)
     tst_complex = ComplexDataset(args.data_dir, "%s_test" % args.dataset, args.cut_dist, args.num_angle, 0, 289)
     val_complex = ComplexDataset(args.data_dir, "%s_val" % args.dataset, args.cut_dist, args.num_angle, 0, 376)
-    trn_loader = Dataloader(trn_complex, args.batch_size, shuffle=True, num_workers=args.num_workers, collate_fn=collate_fn)
+    trn_loader = Dataloader(trn_complex, args.batch_size, shuffle=True, num_workers=1, collate_fn=collate_fn)
     tst_loader = Dataloader(tst_complex, args.batch_size, shuffle=False, num_workers=1, collate_fn=collate_fn)
     val_loader = Dataloader(val_complex, args.batch_size, shuffle=False, num_workers=1, collate_fn=collate_fn)
 
