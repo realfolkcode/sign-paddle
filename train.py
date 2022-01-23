@@ -24,7 +24,7 @@ import numpy as np
 import paddle
 import paddle.nn.functional as F
 from pgl.utils.data import Dataloader
-from dataset import ComplexDataset, collate_fn
+from dataset import ComplexDataset, BuildDataset, collate_fn
 from model import SIGN
 from utils import rmse, mae, sd, pearson
 from tqdm import tqdm
