@@ -203,6 +203,8 @@ class ComplexDataset(BaseDataset):
 
         idx = 0
         for mol, label in tqdm(zip(data_mols, data_Y)):
+            if idx > end:
+                break
             if self.has_cache(idx):
                 graphs, global_feat, label = self.load(idx)
             else:
