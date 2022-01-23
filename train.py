@@ -124,7 +124,7 @@ if __name__ == "__main__":
     parser.add_argument('--seed', type=int, default=123)
     parser.add_argument("--save_model", action="store_true", default=True)
     parser.add_argument('--train_len', type=int, default=3390)
-    parser.add_argument('--vest_len', type=int, default=290)
+    parser.add_argument('--test_len', type=int, default=290)
     parser.add_argument('--val_len', type=int, default=377)
 
     parser.add_argument("--lambda_", type=float, default=1.75)
