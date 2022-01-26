@@ -105,14 +105,13 @@ def gen_feature(ligand_name, pocket_name):
     pocket_coords = pocket_coords[:node_num]
     pocket_features = pocket_features[:node_num]
 
-
     try:
         assert (ligand_features[:, charge_idx] != 0).any()
         assert (pocket_features[:, charge_idx] != 0).any()
         assert (ligand_features[:, :9].sum(1) != 0).all()
     except:
         print([ligand_name, pocket_name])
-
+        return 'error'
 
     # try:
     #     assert (ligand_features[:, charge_idx] != 0).any()
@@ -338,6 +337,7 @@ def add_y(df):
     df['value'] = 0.5**(((df['rmsd'] - 1.5) * 4)**2 / 4)
     df.loc[df['rmsd'] < 1.5, ['value']] = 1
     df.loc[df['rmsd'] > 2, ['value']] = 0.5**((df['rmsd']**2) / 4)
+    df['value'] = df.value.array*np.exp(df.value.array)
     return df
 
 def construct_data(dataframe, cutoff):
@@ -362,12 +362,12 @@ def process_dataset(dataset_source, output_path, cutoff, dataset_name):
     """Read dataset from dataset_name. Save processed dataset to output_path 
     Paths in dataset are relative to the file with dataset """
 
-    pandarallel.initialize(progress_bar=True)
-    df = pd.read_csv(dataset_source, sep='\t')
+    pandarallel.initialize(progress_bar=True, use_memory_fs=False)
+    df = pd.read_csv(dataset_source)
 
     # add label
     if 'value' not in df.columns:
-        if ('energy' in df.columns and 'rmsd' in df.columns):
+        if 'energy' in df.columns and 'rmsd' in df.columns:
             df = add_y(df)
         else:
             raise ValueError('Needs label')
@@ -387,9 +387,16 @@ def process_dataset(dataset_source, output_path, cutoff, dataset_name):
     tic = time.perf_counter()
     df['result'] = df.parallel_apply(lambda x: gen_feature(x.ligand, x.pocket), axis = 1)    
     toc = time.perf_counter()
-    print(f"Generated features in {toc - tic:0.4f} seconds")
+    print(f"Generated atomic features in {toc - tic:0.4f} seconds")
     print(df['result'].isna().sum(), "problematic complexes are excluded")
     df.dropna(subset=['result'], inplace=True)
+
+    df.to_csv('atomic_features.csv')
+
+    # df = pd.read_csv('atomic_features.csv')
+    # df.result.apply(pd.Series)
+    # print(type(df.result[0]))
+    # poop
 
     # interaction features
     print("Calculating interaction features:")
@@ -400,6 +407,8 @@ def process_dataset(dataset_source, output_path, cutoff, dataset_name):
         **{'pk': x.value}}, axis=1)
     toc = time.perf_counter()
     print(f"Calculated interaction features in {toc - tic:0.4f} seconds")
+
+    df.to_csv('interaction_features.csv')
 
     # save datasets to files
     if 'type' in df.columns:
@@ -417,7 +426,7 @@ def process_dataset(dataset_source, output_path, cutoff, dataset_name):
         del valid
     else:
         all_dataset = construct_data(df, cutoff)
-        with open(os.path.join(output_path, dataset_name + '_all.pkl'), 'wb') as f:
+        with open(os.path.join(output_path, dataset_name + '_67k_all.pkl'), 'wb') as f:
             pickle.dump(all_dataset, f)
 
 
