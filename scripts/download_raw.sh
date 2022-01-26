@@ -8,7 +8,7 @@ PDBBIND_URL="https://www.dropbox.com/sh/2uih3c6fq37qfli/AAAO_w7sZJE6D0GsF-iWoEOG
 
 DATASET_URL="https://www.dropbox.com/s/f4xq6bb6bci457t/67k_docked.zip"
 
-TARGET_URL="https://www.dropbox.com/s/4sx8vtrhwjxunwj/67k-energy_rmsd.tsv"
+TARGET_URL="https://www.dropbox.com/s/wmgl0318vnxz75u/dataframe_63k.csv"
 
 wget -P "../data" $PDBBIND_URL
 wget -P "../data" $DATASET_URL
