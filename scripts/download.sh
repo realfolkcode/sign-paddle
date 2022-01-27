@@ -18,6 +18,10 @@ elif [ "$DATASET" == "pdb100" ]; then
 	TRAIN_URL="https://www.dropbox.com/s/pljwykc4s79czdb/pdb100_train.pkl"
 	VAL_URL="https://www.dropbox.com/s/zz17p4ppt9sf2su/pdb100_val.pkl"
 	TEST_URL="https://www.dropbox.com/s/2o6eiqkuamkgb2d/pdb100_test.pkl"
+elif [ "$DATASET" == "63k" ]; then
+	TRAIN_URL="https://docs.google.com/uc?export=download&id=1Gv4d-o6vmRou3hdltzF5SvVRT2rEFlP9"
+	VAL_URL="https://docs.google.com/uc?export=download&id=11Dmo4CTog53P_tEIlLa2Jnr7kkN2XfoP"
+	TEST_URL="https://docs.google.com/uc?export=download&id=155o_Lf81nmoi3MNM_urLSN0K7mnqiVJA"
 fi
 
 wget -P "../data" $TRAIN_URL
