@@ -362,7 +362,7 @@ def process_dataset(dataset_source, output_path, cutoff, dataset_name):
     """Read dataset from dataset_name. Save processed dataset to output_path 
     Paths in dataset are relative to the file with dataset """
 
-    pandarallel.initialize(progress_bar=False, use_memory_fs=False)
+    pandarallel.initialize(nb_workers=6, progress_bar=False, use_memory_fs=False)
     df = pd.read_csv(dataset_source)
 
     # add label
