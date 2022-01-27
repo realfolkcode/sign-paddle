@@ -64,7 +64,7 @@ class BuildDataset(BaseDataset):
         #print('Saving graphs...')
         graph_path = self.graph_prefix + f'_{idx}.pkl'
         with open(graph_path, 'wb') as f:
-            pickle.dump((graphs, global_feat, label), f)
+            pickle.dump((graphs, global_feat, label), f, protocol=4)
 
     def build_graph(self, mol):
         num_atoms_d, coords, features, atoms, inter_feats = mol
