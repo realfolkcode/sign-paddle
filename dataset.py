@@ -75,7 +75,8 @@ class BuildDataset(BaseDataset):
         dist_mat = distance.cdist(coords, coords, 'euclidean')
         np.fill_diagonal(dist_mat, np.inf)
         inter_feats = np.array([inter_feats])
-        inter_feats = inter_feats / inter_feats.sum()
+        if inter_feats.sum() != 0:
+            inter_feats = inter_feats / inter_feats.sum()
 
         ############################
         # build atom to atom graph #
