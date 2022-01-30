@@ -111,7 +111,7 @@ def gen_feature(ligand_name, pocket_name):
         assert (ligand_features[:, :9].sum(1) != 0).all()
     except:
         print([ligand_name, pocket_name])
-        return 'error'
+        return {'error':1}
 
     # try:
     #     assert (ligand_features[:, charge_idx] != 0).any()
@@ -337,7 +337,7 @@ def add_y(df):
     df['value'] = 0.5**(((df['rmsd'] - 1.5) * 4)**2 / 4)
     df.loc[df['rmsd'] < 1.5, ['value']] = 1
     df.loc[df['rmsd'] > 2, ['value']] = 0.5**((df['rmsd']**2) / 4)
-    df['value'] = df.value.array*np.exp(df.value.array)
+    df['value'] = df.value.array*np.exp(df.energy.array)
     return df
 
 def construct_data(dataframe, cutoff):
@@ -362,8 +362,12 @@ def process_dataset(dataset_source, output_path, cutoff, dataset_name):
     """Read dataset from dataset_name. Save processed dataset to output_path 
     Paths in dataset are relative to the file with dataset """
 
-    pandarallel.initialize(nb_workers=6, progress_bar=False, use_memory_fs=False)
-    df = pd.read_csv(dataset_source)
+    pandarallel.initialize(progress_bar=True, use_memory_fs=False)
+    
+    if dataset_source.endswith('.tsv'):
+       df = pd.read_csv(dataset_source, sep='\t')
+    elif dataset_source.endswith('.csv'):
+       df = pd.read_csv(dataset_source)
 
     # add label
     if 'value' not in df.columns:
@@ -391,13 +395,8 @@ def process_dataset(dataset_source, output_path, cutoff, dataset_name):
     print(df['result'].isna().sum(), "problematic complexes are excluded")
     df.dropna(subset=['result'], inplace=True)
 
-    df.to_csv('atomic_features.csv')
-
-    # df = pd.read_csv('atomic_features.csv')
-    # df.result.apply(pd.Series)
-    # print(type(df.result[0]))
-    # poop
-
+    df.to_csv(dataset_name + '_atomic_features.csv')
+    
     # interaction features
     print("Calculating interaction features:")
     keys = [(i,j) for i in atom_types_ for j in atom_types]
@@ -408,26 +407,26 @@ def process_dataset(dataset_source, output_path, cutoff, dataset_name):
     toc = time.perf_counter()
     print(f"Calculated interaction features in {toc - tic:0.4f} seconds")
 
-    df.to_csv('interaction_features.csv')
+    df.to_csv(dataset_name + '_interaction_features.csv')
 
     # save datasets to files
     if 'type' in df.columns:
         train = construct_data(df[df.type == 'training'], cutoff)
         with open(os.path.join(output_path, dataset_name + '_train.pkl'), 'wb') as f:
-            pickle.dump(train, f)
+            pickle.dump(train, f, protocol=pickle.HIGHEST_PROTOCOL)
         del train
         test  = construct_data(df[df.type == 'test'], cutoff)
         with open(os.path.join(output_path, dataset_name + '_test.pkl'), 'wb') as f:
-            pickle.dump(test, f) 
+            pickle.dump(test, f, protocol=pickle.HIGHEST_PROTOCOL) 
         del test
         valid = construct_data(df[df.type == 'validation'], cutoff)
         with open(os.path.join(output_path, dataset_name + '_val.pkl'), 'wb') as f:
-            pickle.dump(valid, f)
+            pickle.dump(valid, f, protocol=pickle.HIGHEST_PROTOCOL)
         del valid
     else:
         all_dataset = construct_data(df, cutoff)
-        with open(os.path.join(output_path, dataset_name + '_67k_all.pkl'), 'wb') as f:
-            pickle.dump(all_dataset, f)
+        with open(os.path.join(output_path, dataset_name + '_all.pkl'), 'wb') as f:
+            pickle.dump(all_dataset, f, protocol=pickle.HIGHEST_PROTOCOL)
 
 
 if __name__ == "__main__":
