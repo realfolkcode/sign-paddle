@@ -31,7 +31,7 @@ def count_interactions(data_path, dataset, cut_dist, num_angles):
     graph_prefix = f'{dataset}_{int(cut_dist)}_{num_angles}_pgl_graph_'
     for filename in os.listdir(data_path):
         if filename.startswith(graph_prefix):
-            with open(filename, 'rb') as f:
+            with open(os.path.join(data_path, filename), 'rb') as f:
                 _, global_feat, _ = pickle.load(f)
                 if np.sum(global_feat[2]) == 0:
                     c += 1
