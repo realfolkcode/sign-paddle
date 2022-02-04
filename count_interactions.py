@@ -20,6 +20,7 @@ import math
 import argparse
 import random
 import numpy as np
+import pickle5 as pickle
 
 import paddle
 import paddle.nn.functional as F
