@@ -39,7 +39,7 @@ def count_interactions(data_path, dataset, cut_dist, num_angles):
                     c += 1
                 else:
                     idx = filename[len(graph_prefix):-4]
-                    idx_lst.append(idx)
+                    idx_lst.append(int(idx))
     np.savetxt(os.path.join(data_path, 'interactions.txt'), np.array(idx_lst).reshape(-1))
     print(c)
 
