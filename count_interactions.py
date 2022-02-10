@@ -29,19 +29,21 @@ from tqdm import tqdm
 
 def count_interactions(data_path, dataset, cut_dist, num_angles):
     c = 0
+    n = 0
     idx_lst = []
     graph_prefix = f'{dataset}_{int(cut_dist)}_{num_angles}_pgl_graph_'
     for filename in os.listdir(data_path):
         if filename.startswith(graph_prefix):
             with open(os.path.join(data_path, filename), 'rb') as f:
                 _, global_feat, _ = pickle.load(f)
+                n += 1
                 if np.sum(global_feat[2]) == 0:
                     c += 1
                 else:
                     idx = filename[len(graph_prefix):-4]
                     idx_lst.append(int(idx))
-    np.savetxt(os.path.join(data_path, 'interactions.txt'), np.array(idx_lst).reshape(-1))
-    print(c)
+    np.savetxt(os.path.join(data_path, 'interactions_' + dataset +'.txt'), np.array(idx_lst).reshape(-1))
+    print(c, 'out of', n)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -53,3 +55,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     count_interactions(args.data_dir, "%s_train" % args.dataset, args.cut_dist, args.num_angle)
+    count_interactions(args.data_dir, "%s_val" % args.dataset, args.cut_dist, args.num_angle)
+    count_interactions(args.data_dir, "%s_test" % args.dataset, args.cut_dist, args.num_angle)
