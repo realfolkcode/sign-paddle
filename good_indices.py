@@ -22,7 +22,7 @@ import numpy as np
 import argparse
 
 
-def get_good_indices(dataset_source, output_path, cutoff, dataset_name):
+def get_good_indices(dataset_source, output_path, dataset_name):
     if dataset_source.endswith('.tsv'):
        df = pd.read_csv(dataset_source, sep='\t')
     elif dataset_source.endswith('.csv'):
