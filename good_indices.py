@@ -52,4 +52,4 @@ if __name__ == "__main__":
     parser.add_argument('--output_path', type=str, default='./data/')
     parser.add_argument('--dataset_name', type=str, default='dataset')
     args = parser.parse_args()
-    get_good_indices(args.dataset_file, args.output_path, args.cutoff, args.dataset_name)
+    get_good_indices(args.dataset_file, args.output_path, args.dataset_name)
