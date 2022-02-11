@@ -173,7 +173,9 @@ if __name__ == "__main__":
     if args.good:
         train_idx, val_idx, test_idx = load_good_indices(args.data_dir, args.dataset)
     else:
-        train_idx, val_idx, test_idx = None
+        train_idx = None
+        val_idx = None
+        test_idx = None
 
     tst_complex = ComplexDataset(args.data_dir, "%s_test" % args.dataset, args.cut_dist, args.num_angle, 0, test_len-1, test_idx)
     val_complex = ComplexDataset(args.data_dir, "%s_val" % args.dataset, args.cut_dist, args.num_angle, 0, val_len-1, val_idx)

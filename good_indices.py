@@ -47,7 +47,9 @@ def save_good_indices(dataset_source, output_path, dataset_name):
 
 
 def load_good_indices(data_path, dataset_name):
-    train_idx, val_idx, test_idx = None
+    train_idx = None
+    val_idx = None
+    test_idx = None
 
     train_path = os.path.join(data_path, dataset_name + '_idx_train.npy')
     val_path = os.path.join(data_path, dataset_name + '_idx_val.npy')
