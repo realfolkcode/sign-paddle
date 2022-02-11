@@ -33,9 +33,9 @@ def save_good_indices(dataset_source, output_path, dataset_name):
     df_val = df.loc[df['type'] == 'validation'].reset_index()
     df_test = df.loc[df['type'] == 'test'].reset_index()
 
-    train_idx = df_train.query('rmsd < 1.5')['index'].values
-    val_idx = df_val.query('rmsd < 1.5')['index'].values
-    test_idx = df_test.query('rmsd < 1.5')['index'].values
+    train_idx = df_train.query('rmsd < 1.5').index
+    val_idx = df_val.query('rmsd < 1.5').index
+    test_idx = df_test.query('rmsd < 1.5').index
 
     print('Train len:', len(train_idx))
     print('Val len:', len(val_idx))
