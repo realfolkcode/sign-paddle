@@ -1,6 +1,6 @@
 ## SIGN-Paddle
 
-Source code for KDD 2021 paper: "Structure-aware Interactive Graph Neural Networks for the Prediction of Protein-Ligand Binding Affinity".
+An *unofficial* modification to the source code for KDD 2021 paper: "Structure-aware Interactive Graph Neural Networks for the Prediction of Protein-Ligand Binding Affinity".
 
 ### Dependencies
 
