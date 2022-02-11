@@ -26,6 +26,7 @@ import paddle.nn.functional as F
 from pgl.utils.data import Dataloader
 from dataset import ComplexDataset, BuildDataset, collate_fn
 from model import SIGN
+from good_indices import load_good_indices
 from utils import rmse, mae, sd, pearson
 from tqdm import tqdm
 
@@ -124,6 +125,7 @@ if __name__ == "__main__":
     parser.add_argument('--seed', type=int, default=123)
     parser.add_argument("--save_model", action="store_true", default=True)
     parser.add_argument('--chunks', type=int, default=1)
+    parser.add_argument('--good', action="store_true", default=False)
 
     parser.add_argument("--lambda_", type=float, default=1.75)
     parser.add_argument("--feat_drop", type=float, default=0.2)
@@ -168,8 +170,13 @@ if __name__ == "__main__":
     test_len = len(tst_complex)
     val_len = len(val_complex)
 
-    tst_complex = ComplexDataset(args.data_dir, "%s_test" % args.dataset, args.cut_dist, args.num_angle, 0, test_len-1)
-    val_complex = ComplexDataset(args.data_dir, "%s_val" % args.dataset, args.cut_dist, args.num_angle, 0, val_len-1)
+    if args.good:
+        train_idx, val_idx, test_idx = load_good_indices(args.data_dir, args.dataset)
+    else:
+        train_idx, val_idx, test_idx = None
+
+    tst_complex = ComplexDataset(args.data_dir, "%s_test" % args.dataset, args.cut_dist, args.num_angle, 0, test_len-1, test_idx)
+    val_complex = ComplexDataset(args.data_dir, "%s_val" % args.dataset, args.cut_dist, args.num_angle, 0, val_len-1, val_idx)
     tst_loader = Dataloader(tst_complex, args.batch_size, shuffle=False, num_workers=1, collate_fn=collate_fn)
     val_loader = Dataloader(val_complex, args.batch_size, shuffle=False, num_workers=1, collate_fn=collate_fn)
 
@@ -182,6 +189,6 @@ if __name__ == "__main__":
             end = train_len - 1
         else:
             end = start + chunk_len - 1
-        trn_complex = ComplexDataset(args.data_dir, "%s_train" % args.dataset, args.cut_dist, args.num_angle, start, end)
+        trn_complex = ComplexDataset(args.data_dir, "%s_train" % args.dataset, args.cut_dist, args.num_angle, start, end, train_idx)
         trn_loader = Dataloader(trn_complex, args.batch_size, shuffle=True, num_workers=1, collate_fn=collate_fn)
         running_log = train(args, model, trn_loader, tst_loader, val_loader, running_log)

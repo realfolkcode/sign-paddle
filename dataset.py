@@ -203,7 +203,7 @@ class BuildDataset(BaseDataset):
 
 
 class ComplexDataset(BaseDataset):
-    def __init__(self, data_path, dataset, cut_dist, num_angle, start, end):
+    def __init__(self, data_path, dataset, cut_dist, num_angle, start, end, indices=None):
         self.data_path = data_path
         self.dataset = dataset
         self.cut_dist = cut_dist
@@ -218,7 +218,7 @@ class ComplexDataset(BaseDataset):
         self.bond_types_list = []
         self.type_count_list = []
 
-        self.load_data(start, end)
+        self.load_data(start, end, indices)
 
     def __len__(self):
         """ Return the number of graphs. """
@@ -244,10 +244,14 @@ class ComplexDataset(BaseDataset):
         self.bond_types_list.append(bond_types)
         self.type_count_list.append(type_count)
 
-    def load_data(self, start, end):
+    def load_data(self, start, end, indices=None):
         print('Loading dataset...')
-        for idx in tqdm(range(start, end + 1)):
-            self.load(idx)
+        if indices is None:
+            for idx in tqdm(range(start, end + 1)):
+                self.load(idx)
+        else:
+            for idx in tqdm(indices):
+                self.load(idx)
         self.labels = np.array(self.labels).reshape(-1, 1)
 
 def collate_fn(batch):

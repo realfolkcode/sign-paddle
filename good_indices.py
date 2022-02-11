@@ -22,7 +22,7 @@ import numpy as np
 import argparse
 
 
-def get_good_indices(dataset_source, output_path, dataset_name):
+def save_good_indices(dataset_source, output_path, dataset_name):
     if dataset_source.endswith('.tsv'):
        df = pd.read_csv(dataset_source, sep='\t')
     elif dataset_source.endswith('.csv'):
@@ -46,10 +46,27 @@ def get_good_indices(dataset_source, output_path, dataset_name):
     np.save(os.path.join(output_path, dataset_name + '_idx_test.npy'), test_idx, allow_pickle=False)
 
 
+def load_good_indices(data_path, dataset_name):
+    train_idx, val_idx, test_idx = None
+
+    train_path = os.path.join(data_path, dataset_name + '_idx_train.npy')
+    val_path = os.path.join(data_path, dataset_name + '_idx_val.npy')
+    test_path = os.path.join(data_path, dataset_name + '_idx_test.npy')
+
+    if os.path.exists(train_path):
+        train_idx = np.load(train_path)
+    if os.path.exists(val_path):
+        val_idx = np.load(val_path)
+    if os.path.exists(test_path):
+        test_idx = np.load(test_path)
+
+    return train_idx, val_idx, test_idx
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset_file', type=str)
     parser.add_argument('--output_path', type=str, default='./data/')
-    parser.add_argument('--dataset_name', type=str, default='dataset')
+    parser.add_argument('--dataset_name', type=str, default='63k')
     args = parser.parse_args()
-    get_good_indices(args.dataset_file, args.output_path, args.dataset_name)
+    save_good_indices(args.dataset_file, args.output_path, args.dataset_name)
