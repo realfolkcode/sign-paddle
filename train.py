@@ -23,6 +23,7 @@ import numpy as np
 
 import paddle
 import paddle.nn.functional as F
+from paddle import nn
 from pgl.utils.data import Dataloader
 from dataset import ComplexDataset, BuildDataset, collate_fn
 from model import SIGN
@@ -61,6 +62,7 @@ def train(args, model, trn_loader, tst_loader, val_loader, running_log):
     scheduler = paddle.optimizer.lr.PiecewiseDecay(boundaries=boundaries, values=values, verbose=False)
     optim = paddle.optimizer.Adam(learning_rate=scheduler, parameters=model.parameters())
     # l1_loss = paddle.nn.loss.L1Loss(reduction='sum')
+    criterion = nn.BCEWithLogitsLoss()
 
     rmse_val_best, res_tst_best = 1e9, ''
     print('Start training model...')
@@ -73,7 +75,8 @@ def train(args, model, trn_loader, tst_loader, val_loader, running_log):
             feats_hat, y_hat = model(a2a_g, b2a_g, b2b_gl, types, counts)
 
             # loss function
-            loss = F.l1_loss(y_hat, y, reduction='sum')
+            #loss = F.l1_loss(y_hat, y, reduction='sum')
+            loss = criterion(y_hat, y, reduction='sum')
             loss_inter = F.l1_loss(feats_hat, feats, reduction='sum')
             loss += args.lambda_ * loss_inter
             loss.backward()

@@ -26,6 +26,7 @@ from scipy.spatial import distance
 from scipy.sparse import coo_matrix
 from utils import cos_formula
 from tqdm import tqdm
+import pandas as pd
 
 prot_atom_ids = [6, 7, 8, 16]
 drug_atom_ids = [6, 7, 8, 9, 15, 16, 17, 35, 53]
@@ -233,10 +234,9 @@ class ComplexDataset(BaseDataset):
         """ Load the generated graphs. """
         graph_path = self.graph_prefix + f'_{idx}.pkl'
         with open(graph_path, 'rb') as f:
-            graphs, global_feat, label = pickle.load(f)
+            graphs, global_feat, score = pickle.load(f)
         a2a_graph, b2a_graph, b2b_graph = graphs
         inter_feats, bond_types, type_count = global_feat
-        self.labels.append(label)
         self.a2a_graphs.append(a2a_graph)
         self.b2a_graphs.append(b2a_graph)
         self.b2b_grpahs_list.append(b2b_graph)
@@ -252,7 +252,8 @@ class ComplexDataset(BaseDataset):
         else:
             for idx in tqdm(indices):
                 self.load(idx)
-        self.labels = np.array(self.labels).reshape(-1, 1)
+        df = pd.read_csv('./data/dataframe_63k.csv')
+        self.labels = (df['rmsd'] < 1.5).astype('int8').values.reshape(-1, 1)
 
 def collate_fn(batch):
     a2a_gs, b2a_gs, b2b_gs_l, feats, types, counts, labels = map(list, zip(*batch))
