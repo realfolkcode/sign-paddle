@@ -252,7 +252,7 @@ class ComplexDataset(BaseDataset):
         else:
             for idx in tqdm(indices):
                 self.load(idx)
-        df = pd.read_csv('./data/dataframe_63k.csv')
+        df = pd.read_csv('../data/dataframe_63k.csv')
         self.labels = (df['rmsd'] < 1.5).astype('int8').values.reshape(-1, 1)
 
 def collate_fn(batch):
