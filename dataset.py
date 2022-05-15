@@ -253,7 +253,7 @@ class ComplexDataset(BaseDataset):
             for idx in tqdm(indices):
                 self.load(idx)
         df = pd.read_csv('../data/dataframe_63k.csv')
-        self.labels = (df['rmsd'] < 1.5).astype('int8').values.reshape(-1, 1)
+        self.labels = (df['rmsd'] < 1.5).astype('float32').to_numpy().reshape(-1, 1)
 
 def collate_fn(batch):
     a2a_gs, b2a_gs, b2b_gs_l, feats, types, counts, labels = map(list, zip(*batch))
