@@ -204,7 +204,7 @@ class BuildDataset(BaseDataset):
 
 
 class ComplexDataset(BaseDataset):
-    def __init__(self, data_path, dataset, cut_dist, num_angle, start, end, indices=None):
+    def __init__(self, data_path, dataset, cut_dist, num_angle, start, end, set_type, indices=None):
         self.data_path = data_path
         self.dataset = dataset
         self.cut_dist = cut_dist
@@ -219,7 +219,7 @@ class ComplexDataset(BaseDataset):
         self.bond_types_list = []
         self.type_count_list = []
 
-        self.load_data(start, end, indices)
+        self.load_data(start, end, set_type, indices)
 
     def __len__(self):
         """ Return the number of graphs. """
@@ -244,7 +244,7 @@ class ComplexDataset(BaseDataset):
         self.bond_types_list.append(bond_types)
         self.type_count_list.append(type_count)
 
-    def load_data(self, start, end, indices=None):
+    def load_data(self, start, end, set_type, indices=None):
         print('Loading dataset...')
         if indices is None:
             for idx in tqdm(range(start, end + 1)):
@@ -253,7 +253,7 @@ class ComplexDataset(BaseDataset):
             for idx in tqdm(indices):
                 self.load(idx)
         df = pd.read_csv('../data/dataframe_63k.csv')
-        self.labels = (df['rmsd'] < 1.5).astype('float32').to_numpy().reshape(-1, 1)
+        self.labels = (df[df['type']==set_type]['rmsd'] < 1.5).astype('float32').values.reshape(-1, 1)
 
 def collate_fn(batch):
     a2a_gs, b2a_gs, b2b_gs_l, feats, types, counts, labels = map(list, zip(*batch))
