@@ -62,7 +62,7 @@ def train(args, model, trn_loader, tst_loader, val_loader, running_log):
     scheduler = paddle.optimizer.lr.PiecewiseDecay(boundaries=boundaries, values=values, verbose=False)
     optim = paddle.optimizer.Adam(learning_rate=scheduler, parameters=model.parameters())
     # l1_loss = paddle.nn.loss.L1Loss(reduction='sum')
-    criterion = nn.BCEWithLogitsLoss()
+    criterion = nn.BCEWithLogitsLoss(reduction='sum')
 
     rmse_val_best, res_tst_best = 1e9, ''
     print('Start training model...')
@@ -76,7 +76,7 @@ def train(args, model, trn_loader, tst_loader, val_loader, running_log):
 
             # loss function
             #loss = F.l1_loss(y_hat, y, reduction='sum')
-            loss = criterion(y_hat, y, reduction='sum')
+            loss = criterion(y_hat, y)
             loss_inter = F.l1_loss(feats_hat, feats, reduction='sum')
             loss += args.lambda_ * loss_inter
             loss.backward()
