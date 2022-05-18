@@ -29,6 +29,7 @@ from dataset import ComplexDataset, BuildDataset, collate_fn
 from model import SIGN
 from good_indices import load_good_indices
 from utils import rmse, mae, sd, pearson
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from tqdm import tqdm
 
 paddle.seed(123)
@@ -49,9 +50,9 @@ def evaluate(model, loader):
         y_hat_list += y_hat.tolist()
         y_list += y.tolist()
 
-    y_hat = np.array(y_hat_list).reshape(-1,)
+    y_hat = (np.array(y_hat_list) > 0).astype(int).reshape(-1,)
     y = np.array(y_list).reshape(-1,)
-    return rmse(y, y_hat), mae(y, y_hat), sd(y, y_hat), pearson(y, y_hat)
+    return accuracy_score(y, y_hat), precision_score(y, y_hat), recall_score(y, y_hat), f1_score(y, y_hat)
 
 
 def train(args, model, trn_loader, tst_loader, val_loader, running_log):
