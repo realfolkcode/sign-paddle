@@ -48,8 +48,8 @@ def evaluate(model, loader):
         y_hat_list += y_hat.tolist()
         y_list += y.tolist()
 
-    y_hat = np.array(y_hat_list).reshape(-1,)
-    y = (np.array(y_list) > 0).astype(int).reshape(-1,)
+    y_hat = (np.array(y_hat_list) > 0).astype(int).reshape(-1,)
+    y = np.array(y_list).reshape(-1,)
     return accuracy_score(y, y_hat), precision_score(y, y_hat), recall_score(y, y_hat), f1_score(y, y_hat)
 
 
