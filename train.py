@@ -64,7 +64,7 @@ def train(args, model, trn_loader, tst_loader, val_loader, running_log):
     # l1_loss = paddle.nn.loss.L1Loss(reduction='sum')
     criterion = nn.BCEWithLogitsLoss(reduction='sum')
 
-    rmse_val_best, res_tst_best = 1e9, ''
+    f1_val_best, res_tst_best = 1e9, ''
     print('Start training model...')
     for epoch in range(1, args.epochs + 1):
         sum_loss, sum_loss_inter = 0, 0
@@ -89,19 +89,19 @@ def train(args, model, trn_loader, tst_loader, val_loader, running_log):
 
 
         end_trn = time.time()
-        rmse_val, mae_val, sd_val, r_val = evaluate(model, val_loader)
-        rmse_tst, mae_tst, sd_tst, r_tst = evaluate(model, tst_loader)
+        accuracy_val, precision_val, recall_val, f1_val = evaluate(model, val_loader)
+        accuracy_tst, precision_tst, recall_tst, f1_tst = evaluate(model, tst_loader)
         end_val = time.time()
         log = '-----------------------------------------------------------------------\n'
         log += 'Epoch: %d, loss: %.4f, loss_b: %.4f, time: %.4f, val_time: %.4f.\n' % (
                 epoch, sum_loss/(epoch_step*args.batch_size), sum_loss_inter/(epoch_step*args.batch_size), end_trn-start, end_val-end_trn)
-        log += 'Val - RMSE: %.6f, MAE: %.6f, SD: %.6f, R: %.6f.\n' % (rmse_val, mae_val, sd_val, r_val)
-        log += 'Test - RMSE: %.6f, MAE: %.6f, SD: %.6f, R: %.6f.\n' % (rmse_tst, mae_tst, sd_tst, r_tst)
+        log += 'Val - Accuracy: %.6f, Precision: %.6f, Recall: %.6f, F1: %.6f.\n' % (accuracy_val, precision_val, recall_val, f1_val)
+        log += 'Test - Accuracy: %.6f, Precision: %.6f, Recall: %.6f, F1: %.6f.\n' % (accuracy_tst, precision_tst, recall_tst, f1_tst)
         print(log)
 
-        if rmse_val < rmse_val_best:
-            rmse_val_best = rmse_val
-            res_tst_best = 'Best - RMSE: %.6f, MAE: %.6f, SD: %.6f, R: %.6f.\n' % (rmse_tst, mae_tst, sd_tst, r_tst)
+        if f1_val < f1_val_best:
+            f1_val_best = f1_val
+            res_tst_best = 'Best - Accuracy: %.6f, Precision: %.6f, Recall: %.6f, F1: %.6f.\n' % (accuracy_tst, precision_tst, recall_tst, f1_tst)
             if args.save_model:
                 obj = {'model': model.state_dict(), 'epoch': epoch}
                 path = os.path.join(args.model_dir, 'saved_model')

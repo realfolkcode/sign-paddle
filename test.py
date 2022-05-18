@@ -27,6 +27,7 @@ from pgl.utils.data import Dataloader
 from dataset import ComplexDataset, collate_fn
 from model import SIGN
 from utils import rmse, mae, sd, pearson
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from tqdm import tqdm
 
 paddle.seed(123)
@@ -49,7 +50,7 @@ def evaluate(model, loader):
 
     y_hat = np.array(y_hat_list).reshape(-1,)
     y = np.array(y_list).reshape(-1,)
-    return rmse(y, y_hat), mae(y, y_hat), sd(y, y_hat), pearson(y, y_hat)
+    return accuracy_score(y, y_hat), precision_score(y, y_hat), recall_score(y, y_hat), f1_score(y, y_hat)
 
 
 if __name__ == "__main__":
