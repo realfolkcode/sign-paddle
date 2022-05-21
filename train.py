@@ -65,7 +65,7 @@ def train(args, model, trn_loader, tst_loader, val_loader, running_log):
     # l1_loss = paddle.nn.loss.L1Loss(reduction='sum')
     criterion = nn.BCEWithLogitsLoss(reduction='sum')
 
-    f1_val_best, res_tst_best = 1e9, ''
+    f1_val_best, res_tst_best = 0, ''
     print('Start training model...')
     for epoch in range(1, args.epochs + 1):
         sum_loss, sum_loss_inter = 0, 0
@@ -100,7 +100,7 @@ def train(args, model, trn_loader, tst_loader, val_loader, running_log):
         log += 'Test - Accuracy: %.6f, Precision: %.6f, Recall: %.6f, F1: %.6f.\n' % (accuracy_tst, precision_tst, recall_tst, f1_tst)
         print(log)
 
-        if f1_val < f1_val_best:
+        if f1_val > f1_val_best:
             f1_val_best = f1_val
             res_tst_best = 'Best - Accuracy: %.6f, Precision: %.6f, Recall: %.6f, F1: %.6f.\n' % (accuracy_tst, precision_tst, recall_tst, f1_tst)
             if args.save_model:
