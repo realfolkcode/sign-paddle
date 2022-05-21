@@ -96,7 +96,7 @@ if __name__ == "__main__":
     tst_complex = BuildDataset(args.data_dir, "%s_test" % args.dataset, args.cut_dist, args.num_angle)
     test_len = len(tst_complex)
 
-    tst_complex = ComplexDataset(args.data_dir, "%s_test" % args.dataset, args.cut_dist, args.num_angle, 0, test_len-1)
+    tst_complex = ComplexDataset(args.data_dir, "%s_test" % args.dataset, args.cut_dist, args.num_angle, 0, test_len-1, 'test')
     tst_loader = Dataloader(tst_complex, args.batch_size, shuffle=False, num_workers=1, collate_fn=collate_fn)
 
     model = SIGN(args)
