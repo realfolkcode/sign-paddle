@@ -252,8 +252,13 @@ class ComplexDataset(BaseDataset):
         else:
             for idx in tqdm(indices):
                 self.load(idx)
-        df = pd.read_csv('../data/dataframe_63k.csv')
-        self.labels = (df[df['type']==set_type]['rmsd'] < 1.5).astype('float32').values.reshape(-1, 1)
+        if set_type == 'training':
+            df = pd.read_csv('../data/dataframe_37k_training.csv').query('rmsd < 1.5')
+        elif set_type == 'validation':
+            df = pd.read_csv('../data/dataframe_37k_validation.csv').query('rmsd < 1.5')
+        else:
+            df = pd.read_csv('../data/dataframe_37k_test.csv').query('rmsd < 1.5')
+        self.labels = (df['energy'] - df['e_docking']).values
 
 def collate_fn(batch):
     a2a_gs, b2a_gs, b2b_gs_l, feats, types, counts, labels = map(list, zip(*batch))

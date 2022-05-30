@@ -65,6 +65,23 @@ def load_good_indices(data_path, dataset_name):
     return train_idx, val_idx, test_idx
 
 
+def load_indices(df_path, good=False):
+    train_path = df_path + '_training.csv'
+    val_path = df_path + '_validation.csv'
+    test_path = df_path + '_test.csv'
+
+    if good:
+        train_idx = pd.read_csv(train_path).query('rmsd < 1.5').index
+        val_idx = pd.read_csv(val_path).query('rmsd < 1.5').index
+        test_idx = pd.read_csv(test_path).query('rmsd < 1.5').index
+    else:
+        train_idx = pd.read_csv(train_path).index
+        val_idx = pd.read_csv(val_path).index
+        test_idx = pd.read_csv(test_path).index
+
+    return train_idx, val_idx, test_idx
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset_file', type=str)

@@ -27,7 +27,7 @@ from paddle import nn
 from pgl.utils.data import Dataloader
 from dataset import ComplexDataset, BuildDataset, collate_fn
 from model import SIGN
-from good_indices import load_good_indices
+from good_indices import load_good_indices, load_indices
 from utils import rmse, mae, sd, pearson
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from tqdm import tqdm
@@ -50,9 +50,9 @@ def evaluate(model, loader):
         y_hat_list += y_hat.tolist()
         y_list += y.tolist()
 
-    y_hat = (np.array(y_hat_list) > 0).astype(int).reshape(-1,)
+    y_hat = np.array(y_hat_list).reshape(-1,)
     y = np.array(y_list).reshape(-1,)
-    return accuracy_score(y, y_hat), precision_score(y, y_hat), recall_score(y, y_hat), f1_score(y, y_hat)
+    return rmse(y, y_hat), mae(y, y_hat), sd(y, y_hat), pearson(y, y_hat)
 
 
 def train(args, model, trn_loader, tst_loader, val_loader, running_log):
@@ -62,8 +62,7 @@ def train(args, model, trn_loader, tst_loader, val_loader, running_log):
     values = [args.lr * args.lr_dec_rate ** i for i in range(0, len(boundaries) + 1)]
     scheduler = paddle.optimizer.lr.PiecewiseDecay(boundaries=boundaries, values=values, verbose=False)
     optim = paddle.optimizer.Adam(learning_rate=scheduler, parameters=model.parameters())
-    # l1_loss = paddle.nn.loss.L1Loss(reduction='sum')
-    criterion = nn.BCEWithLogitsLoss(reduction='sum')
+    l1_loss = paddle.nn.loss.L1Loss(reduction='sum')
 
     f1_val_best, res_tst_best = 0, ''
     print('Start training model...')
@@ -76,8 +75,7 @@ def train(args, model, trn_loader, tst_loader, val_loader, running_log):
             feats_hat, y_hat = model(a2a_g, b2a_g, b2b_gl, types, counts)
 
             # loss function
-            #loss = F.l1_loss(y_hat, y, reduction='sum')
-            loss = criterion(y_hat, y)
+            loss = F.l1_loss(y_hat, y, reduction='sum')
             loss_inter = F.l1_loss(feats_hat, feats, reduction='sum')
             loss += args.lambda_ * loss_inter
             loss.backward()
@@ -130,6 +128,7 @@ if __name__ == "__main__":
     parser.add_argument("--save_model", action="store_true", default=True)
     parser.add_argument('--chunks', type=int, default=1)
     parser.add_argument('--good', action="store_true", default=False)
+    parser.add_argument('--dataframe', type=str, default='dataframe_37k')
 
     parser.add_argument("--lambda_", type=float, default=1.75)
     parser.add_argument("--feat_drop", type=float, default=0.2)
@@ -175,11 +174,9 @@ if __name__ == "__main__":
     val_len = len(val_complex)
 
     if args.good:
-        train_idx, val_idx, test_idx = load_good_indices(args.data_dir, args.dataset)
+        train_idx, val_idx, test_idx = load_indices(args.data_dir + args.dataframe, good=True)
     else:
-        train_idx = None
-        val_idx = None
-        test_idx = None
+        train_idx, val_idx, test_idx = load_indices(args.data_dir + args.dataframe)
 
     tst_complex = ComplexDataset(args.data_dir, "%s_test" % args.dataset, args.cut_dist, args.num_angle, 0, test_len-1, 'test', test_idx)
     val_complex = ComplexDataset(args.data_dir, "%s_val" % args.dataset, args.cut_dist, args.num_angle, 0, val_len-1, 'validation', val_idx)
