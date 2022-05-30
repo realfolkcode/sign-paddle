@@ -258,7 +258,7 @@ class ComplexDataset(BaseDataset):
             df = pd.read_csv('../data/dataframe_37k_validation.csv').query('rmsd < 1.5')
         else:
             df = pd.read_csv('../data/dataframe_37k_test.csv').query('rmsd < 1.5')
-        self.labels = (df['energy'] - df['e_docking']).values
+        self.labels = (df['energy'] - df['e_docking']).values.reshape(-1, 1)
 
 def collate_fn(batch):
     a2a_gs, b2a_gs, b2b_gs_l, feats, types, counts, labels = map(list, zip(*batch))
