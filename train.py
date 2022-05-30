@@ -174,9 +174,9 @@ if __name__ == "__main__":
     val_len = len(val_complex)
 
     if args.good:
-        train_idx, val_idx, test_idx = load_indices(args.data_dir + args.dataframe, good=True)
+        train_idx, val_idx, test_idx = load_indices(os.path.join(args.data_dir, args.dataframe), good=True)
     else:
-        train_idx, val_idx, test_idx = load_indices(args.data_dir + args.dataframe)
+        train_idx, val_idx, test_idx = load_indices(os.path.join(args.data_dir, args.dataframe))
 
     tst_complex = ComplexDataset(args.data_dir, "%s_test" % args.dataset, args.cut_dist, args.num_angle, 0, test_len-1, 'test', test_idx)
     val_complex = ComplexDataset(args.data_dir, "%s_val" % args.dataset, args.cut_dist, args.num_angle, 0, val_len-1, 'validation', val_idx)
