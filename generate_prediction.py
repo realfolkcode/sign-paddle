@@ -29,6 +29,7 @@ from dataset import ComplexDataset, BuildDataset, collate_fn
 from model import SIGN
 from utils import rmse, mae, sd, pearson
 from tqdm import tqdm
+from good_indices import load_good_indices, load_indices
 
 paddle.seed(123)
 
@@ -60,6 +61,8 @@ if __name__ == "__main__":
     parser.add_argument('--seed', type=int, default=123)
     parser.add_argument("--save_model", action="store_true", default=True)
     parser.add_argument('--chunks', type=int, default=1)
+    parser.add_argument('--good', action="store_true", default=False)
+    parser.add_argument('--dataframe', type=str, default='dataframe_37k')
 
     parser.add_argument("--lambda_", type=float, default=1.75)
     parser.add_argument("--feat_drop", type=float, default=0.2)
@@ -92,6 +95,11 @@ if __name__ == "__main__":
         paddle.set_device('cpu')
     else:
         paddle.set_device('gpu:%s' % args.cuda)
+    
+    if args.good:
+        train_idx, val_idx, test_idx = load_indices(os.path.join(args.data_dir, args.dataframe), good=True)
+    else:
+        train_idx, val_idx, test_idx = load_indices(os.path.join(args.data_dir, args.dataframe))
 
     tst_complex = BuildDataset(args.data_dir, "%s_test" % args.dataset, args.cut_dist, args.num_angle)
     test_len = len(tst_complex)
