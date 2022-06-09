@@ -254,13 +254,6 @@ class ComplexDataset(BaseDataset):
         else:
             for idx in tqdm(indices):
                 self.load(idx)
-        if set_type == 'training':
-            df = pd.read_csv('../data/dataframe_37k_training.csv').query('rmsd < 1.5')
-        elif set_type == 'validation':
-            df = pd.read_csv('../data/dataframe_37k_validation.csv').query('rmsd < 1.5')
-        else:
-            df = pd.read_csv('../data/dataframe_37k_test.csv').query('rmsd < 1.5')
-        #self.labels = (df['energy'] - df['e_docking']).values.reshape(-1, 1)
         self.labels = np.array(self.labels).reshape(-1, 1)
 
 def collate_fn(batch):
