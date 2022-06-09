@@ -1,43 +1,23 @@
-## SIGN-Paddle
+## Инструкция для инференса
 
-An *unofficial* modification to the source code for KDD 2021 paper: "Structure-aware Interactive Graph Neural Networks for the Prediction of Protein-Ligand Binding Affinity".
+0) Развертываем окружение
 
-### Dependencies
+`conda env create -f paddleHelix.yml`
 
-- python >= 3.8
-- paddlepaddle >= 2.1.0
-- pgl >= 2.1.4
-- openbabel == 3.1.1 (optional, only for preprocessing)
+`conda activate paddleHelix`
 
-### Datasets
-The PDBbind dataset can be downloaded [here](http://pdbbind-cn.org).
-The CSAR-HiQ dataset can be downloaded [here](http://www.csardock.org).
-You may need to use the [UCSF Chimera tool](https://www.cgl.ucsf.edu/chimera/) to convert the PDB-format files into MOL2-format files for feature extraction at first.
+`pip install pandarallel`
 
-Alternatively, we also provided a [dropbox link](https://www.dropbox.com/sh/2uih3c6fq37qfli/AAD-LHXSWMLAuGWzcQLk5WI3a) for downloading PDBbind and CSAR-HiQ datasets.
+1) Копируем saved_model.pt (чекпоинт с моделью) в директорию models
 
-The downloaded dataset should be preprocessed to obtain features and spatial coordinates:
-```
-python preprocess_pdbbind.py --data_path_core YOUR_DATASET_PATH --data_path_refined YOUR_DATASET_PATH --dataset_name pdbbind2016 --output_path YOUR_OUTPUT_PATH --cutoff 5
-```
-The parameter cutoff is the threshold of cutoff distance between atoms.
+2) dataset_file - это путь к датафрейму с (относительными) путями файлов для белков, лигандов и покетов
 
-You can also use the processed data from [this link](https://www.dropbox.com/sh/68vc7j5cvqo4p39/AAB_96TpzJWXw6N0zxHdsppEa). Before training the model, please put the downloaded files into the directory (./data/).
+dataset_name - название для датасета (может быть любым)
 
-### How to run
-To train the model, you can run this command:
-```
-python train.py --cuda YOUR_DEVICE --model_dir MODEL_PATH_TO_SAVE --dataset pdbbind2016 --cut_dist 5 --num_angle 6
-```
-### Citation
-If you find our work is helpful in your research, please consider citing our paper:
-```bibtex
-@inproceedings{li2021structure,
-  title={Structure-aware Interactive Graph Neural Networks for the Prediction of Protein-Ligand Binding Affinity},
-  author={Li, Shuangli and Zhou, Jingbo and Xu, Tong and Huang, Liang and Wang, Fan and Xiong, Haoyi and Huang, Weili and Dou, Dejing and Xiong, Hui},
-  booktitle={Proceedings of the 27th ACM SIGKDD Conference on Knowledge Discovery \& Data Mining},
-  pages={975--985},
-  year={2021}
-}
-```
-If you have any question, please contact Shuangli Li by email: lsl1997@mail.ustc.edu.cn.
+`python preprocess_dataset.py --dataset_file ./data/example.csv --dataset_name example --output_path ./data/`
+
+3) dataset - должно совпадать с dataset_name из предыдущего пункта 
+
+`python generate_prediction.py --cuda -1 --model_dir ./models --data_dir ./data --dataset example --cut_dist 5 --num_angle 6 --batch_size 8`
+
+На выходе получаем файл prediction.csv в директории models
