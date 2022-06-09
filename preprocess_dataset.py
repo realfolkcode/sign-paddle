@@ -337,7 +337,7 @@ def add_y(df):
     df['value'] = 0.5**(((df['rmsd'] - 1.5) * 4)**2 / 4)
     df.loc[df['rmsd'] < 1.5, ['value']] = 1
     df.loc[df['rmsd'] > 2, ['value']] = 0.5**((df['rmsd']**2) / 4)
-    df['value'] = df.value.array*np.exp(df.energy.array)
+    df['value'] = df.value.array*df.energy.array
     return df
 
 def construct_data(dataframe, cutoff):
@@ -410,23 +410,9 @@ def process_dataset(dataset_source, output_path, cutoff, dataset_name):
     df.to_csv(dataset_name + '_interaction_features.csv')
 
     # save datasets to files
-    if 'type' in df.columns:
-        train = construct_data(df[df.type == 'training'], cutoff)
-        with open(os.path.join(output_path, dataset_name + '_train.pkl'), 'wb') as f:
-            pickle.dump(train, f, protocol=pickle.HIGHEST_PROTOCOL)
-        del train
-        test  = construct_data(df[df.type == 'test'], cutoff)
-        with open(os.path.join(output_path, dataset_name + '_test.pkl'), 'wb') as f:
-            pickle.dump(test, f, protocol=pickle.HIGHEST_PROTOCOL) 
-        del test
-        valid = construct_data(df[df.type == 'validation'], cutoff)
-        with open(os.path.join(output_path, dataset_name + '_val.pkl'), 'wb') as f:
-            pickle.dump(valid, f, protocol=pickle.HIGHEST_PROTOCOL)
-        del valid
-    else:
-        all_dataset = construct_data(df, cutoff)
-        with open(os.path.join(output_path, dataset_name + '_all.pkl'), 'wb') as f:
-            pickle.dump(all_dataset, f, protocol=pickle.HIGHEST_PROTOCOL)
+    all_dataset = construct_data(df, cutoff)
+    with open(os.path.join(output_path, dataset_name + '.pkl'), 'wb') as f:
+        pickle.dump(all_dataset, f, protocol=pickle.HIGHEST_PROTOCOL)
 
 
 if __name__ == "__main__":

@@ -96,15 +96,10 @@ if __name__ == "__main__":
     else:
         paddle.set_device('gpu:%s' % args.cuda)
     
-    if args.good:
-        train_idx, val_idx, test_idx = load_indices(os.path.join(args.data_dir, args.dataframe), good=True)
-    else:
-        train_idx, val_idx, test_idx = load_indices(os.path.join(args.data_dir, args.dataframe))
-
-    tst_complex = BuildDataset(args.data_dir, "%s_test" % args.dataset, args.cut_dist, args.num_angle)
+    tst_complex = BuildDataset(args.data_dir, args.dataset, args.cut_dist, args.num_angle)
     test_len = len(tst_complex)
 
-    tst_complex = ComplexDataset(args.data_dir, "%s_test" % args.dataset, args.cut_dist, args.num_angle, 0, test_len-1, 'test', test_idx)
+    tst_complex = ComplexDataset(args.data_dir, args.dataset, args.cut_dist, args.num_angle, 0, test_len-1, 'test')
     tst_loader = Dataloader(tst_complex, args.batch_size, shuffle=False, num_workers=1, collate_fn=collate_fn)
 
     model = SIGN(args)
