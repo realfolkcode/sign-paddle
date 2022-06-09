@@ -19,7 +19,8 @@ import os
 import numpy as np
 import paddle
 import pgl
-import pickle5 as pickle
+import pickle
+#import pickle5 as pickle
 from pgl.utils.data import Dataset as BaseDataset
 from pgl.utils.data import Dataloader
 from scipy.spatial import distance
