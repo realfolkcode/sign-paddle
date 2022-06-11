@@ -81,7 +81,7 @@ def train(args, model, trn_loader, tst_loader, val_loader, running_log):
             loss.backward()
             optim.step()
             optim.clear_grad()
-            scheduler.step()
+            #scheduler.step()
     
             sum_loss += loss.item()
             sum_loss_inter += loss_inter.item()
